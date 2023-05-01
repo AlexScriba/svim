@@ -1,0 +1,7 @@
+ERR: Some error where it does not look at the path when running the command
+-- 1. Use full paths not relative paths
+-- 2. Display only the end of the path when selecting
+3. Figure out how to make it run globally
+
+4. Let save values for common projects
+5. Incorporate flags
