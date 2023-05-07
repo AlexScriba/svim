@@ -22,10 +22,10 @@ maintainer:         61542302+AlexScriba@users.noreply.github.com
 extra-source-files: CHANGELOG.md
 
 executable svim
-    main-is:          svim.hs
+    main-is: svim.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    -- other-modules: Menu
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -36,6 +36,14 @@ executable svim
       bytestring >= 0.10 && <0.11,
       directory >= 1.3 && <1.4,
       process >= 1.6 && <1.7,
-      split >= 0.2 && <0.3
-    hs-source-dirs:   app
+      split >= 0.2 && <0.3,
+      brick >= 1.7,
+      vty,
+      template-haskell,
+      microlens,
+      microlens-th,
+      mtl
+    hs-source-dirs: app, src
     default-language: Haskell2010
+    ghc-options:
+      -threaded
