@@ -25,7 +25,7 @@ executable svim
     main-is: svim.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules: Menu
+    other-modules: Menu
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -42,6 +42,7 @@ executable svim
       template-haskell,
       microlens,
       microlens-th,
+      microlens-mtl,
       mtl
     hs-source-dirs: app, src
     default-language: Haskell2010

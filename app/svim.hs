@@ -1,13 +1,18 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 import Control.Monad.State (StateT (runStateT), get, gets, lift, put, runStateT)
 import Data.ByteString.UTF8 (fromString, toString)
 import Data.List.Split (split, splitOn)
 import Data.Maybe (listToMaybe)
-import Data.Yaml
+import Data.Yaml (FromJSON, ParseException, ToJSON, decodeEither', encode, object, parseJSON, toJSON, withObject, (.!=), (.:))
+import qualified Data.Yaml as Yml ((.=))
 import Data.Yaml.Pretty (encodePretty)
+import Lens.Micro (set)
+import Lens.Micro.Mtl (use, (.=))
+import Lens.Micro.TH (makeLenses)
 import System.Directory (
     canonicalizePath,
     doesFileExist,
@@ -34,26 +39,32 @@ type Path = String
 
 data ConfigData where
     ConfigData ::
-        { getCommand :: String
-        , numRecent :: Int
-        , saved :: [String]
-        , paths :: [String]
+        { _getCommand :: String
+        , _numRecent :: Int
+        , _saved :: [String]
+        , _paths :: [String]
         } ->
         ConfigData
     deriving (Show)
 
 data Config where
     Config ::
-        { confData :: ConfigData
-        , rootDir :: String
+        { _confData :: ConfigData
+        , _rootDir :: String
         } ->
         Config
     deriving (Show)
 
+makeLenses ''ConfigData
+makeLenses ''Config
+
 splitConf :: Config -> (ConfigData, Path)
-splitConf Config{confData = conf, rootDir = dir} = (conf, dir)
+splitConf Config{_confData = conf, _rootDir = dir} = (conf, dir)
 
 type ConfigIO a = StateT Config IO a
+
+io :: IO a -> ConfigIO a
+io = lift
 
 instance FromJSON ConfigData where
     parseJSON = withObject "Config" $ \o -> do
@@ -66,10 +77,10 @@ instance FromJSON ConfigData where
 instance ToJSON ConfigData where
     toJSON config =
         object
-            [ "command" .= getCommand config
-            , "num_recent" .= numRecent config
-            , "saved" .= saved config
-            , "paths" .= paths config
+            [ "command" Yml..= _getCommand config
+            , "num_recent" Yml..= _numRecent config
+            , "saved" Yml..= _saved config
+            , "paths" Yml..= _paths config
             ]
 
 data Action where
@@ -101,34 +112,35 @@ execute action = case action of
     GetFavourite -> handleGetFavourite
     DeleteFavourite -> handleDeleteFavourite
     GetRecent -> handleGetRecent
-    Error msg -> lift $ handleError msg
+    Error msg -> io $ handleError msg
 
 setConfigCommand :: String -> ConfigIO ()
 setConfigCommand cmd = do
-    (conf, confPath) <- gets splitConf
-    let newConf = conf{getCommand = cmd}
+    (confData . getCommand) .= cmd
+    config <- use confData
+    confPath <- use rootDir
 
-    lift $ saveConfig confPath newConf
+    io $ saveConfig confPath config
 
 setNumRecent :: String -> ConfigIO ()
-setNumRecent num = do
-    (conf, confPath) <- gets splitConf
-
+setNumRecent num =
     case (readMaybe num :: Maybe Int) of
         Nothing -> execute $ Error "Invalid number"
-        Just n ->
-            let newConf = conf{numRecent = n}
-             in lift $ saveConfig confPath newConf
+        Just n -> do
+            (confData . numRecent) .= n
+            config <- use confData
+            confPath <- use rootDir
+            io $ saveConfig confPath config
 
 handleGetRecent :: ConfigIO ()
 handleGetRecent = do
-    (conf, savePath) <- gets splitConf
-    prev <- lift $ getRecents savePath
+    savePath <- use rootDir
+    prev <- io $ getRecents savePath
 
     case prev of
-        [] -> lift $ putStrLn "No Recent Projects"
+        [] -> io $ putStrLn "No Recent Projects"
         prevPaths -> do
-            choice <- lift $ getSelection $ pathToOption <$> prev
+            choice <- io $ getSelection $ pathToOption <$> prev
 
             let index = subtract 1 <$> choice
                 pathChoice = index >>= getMaybe prev
@@ -139,79 +151,82 @@ handleGetRecent = do
 
 handleOpen :: String -> ConfigIO ()
 handleOpen path = do
-    (config, savePath) <- gets splitConf
-    absolutePath <- lift $ canonicalizePath path
+    -- (config, savePath) <- gets splitConf
+    absolutePath <- io $ canonicalizePath path
 
-    let command = "cd " ++ path ++ " && " ++ getCommand config
-    exitCode <- lift $ system command
+    cmd <- use $ confData . getCommand
+    config <- use confData
+    savePath <- use rootDir
+
+    let command = "cd " ++ path ++ " && " ++ cmd
+    exitCode <- io $ system command
 
     case exitCode of
-        ExitSuccess -> lift $ saveRecents config savePath absolutePath
-        ExitFailure code -> lift $ putStrLn $ "Code: " ++ show code
+        ExitSuccess -> saveRecents absolutePath
+        ExitFailure code -> io $ putStrLn $ "Code: " ++ show code
 
 handleOpenAndSave :: String -> String -> ConfigIO ()
 handleOpenAndSave name path = do
-    config <- get
-    absPath <- lift $ canonicalizePath path
+    -- config <- get
+    absPath <- io $ canonicalizePath path
 
-    let (configData, savePath) = splitConf config
+    prevSaved <- use $ confData . saved
+    prevPaths <- use $ confData . paths
 
-        prevSaved = saved configData
-        prevPaths = paths configData
-
-        combs =
+    let combs =
             (name, absPath)
                 : filter
                     (\(s, p) -> s /= name)
                     (zip prevSaved prevPaths)
 
-        newConfig =
-            configData
-                { saved = fst <$> combs
-                , paths = snd <$> combs
-                }
+    (confData . saved) .= map fst combs
+    (confData . paths) .= map snd combs
 
-    lift $ saveConfig savePath newConfig
+    savePath <- use rootDir
+    config <- use confData
+
+    io $ saveConfig savePath config
     execute $ Open path
 
 handleGetFavourite :: ConfigIO ()
 handleGetFavourite = do
-    (conf, savePath) <- gets splitConf
-    case saved conf of
-        [] -> lift $ putStrLn "No Saved Projects"
-        savedNames -> do
-            choice <- lift $ getSelection savedNames
+    savedNames <- use $ confData . saved
+    savedPaths <- use $ confData . paths
+
+    case savedNames of
+        [] -> io $ putStrLn "No Saved Projects"
+        names -> do
+            choice <- io $ getSelection names
 
             let index = subtract 1 <$> choice
-                path = index >>= getMaybe (paths conf)
+                path = index >>= getMaybe savedPaths
 
             case path of
                 Nothing -> execute $ Error "Invalid Selection"
-                Just p -> do
-                    execute $ Open p
+                Just p -> execute $ Open p
 
 handleDeleteFavourite :: ConfigIO ()
 handleDeleteFavourite = do
-    (conf, savePath) <- gets splitConf
-    case saved conf of
-        [] -> lift $ putStrLn "No Saved Projects"
-        savedNames -> do
-            choice <- lift $ getSelection (saved conf)
+    savedNames <- use $ confData . saved
+    savedPaths <- use $ confData . paths
+
+    case savedNames of
+        [] -> io $ putStrLn "No Saved Projects"
+        names -> do
+            choice <- io $ getSelection names
 
             let index = subtract 1 <$> choice
 
             case choice of
                 Nothing -> execute $ Error "Invalid Selection"
                 Just i -> do
-                    let newSaved = drop i (saved conf)
-                        newPath = drop i (paths conf)
-                        newConfig =
-                            conf
-                                { saved = newSaved
-                                , paths = newPath
-                                }
+                    (confData . saved) .= drop i names
+                    (confData . paths) .= drop i savedPaths
 
-                    lift $ saveConfig savePath newConfig
+                    savePath <- use rootDir
+                    config <- use confData
+
+                    io $ saveConfig savePath config
 
 handleError :: String -> IO ()
 handleError msg = putStrLn $ "Error: " ++ msg
@@ -239,15 +254,18 @@ getRecents dir = do
             return $ filter (/= "") $ lines contents
         else return []
 
-saveRecents :: ConfigData -> String -> String -> IO ()
-saveRecents config savePath path = do
-    prevSaved <- getRecents savePath
+saveRecents :: String -> ConfigIO ()
+saveRecents path = do
+    savePath <- use rootDir
+    numRec <- use $ confData . numRecent
 
-    let newSaved = take (numRecent config) $ path : filter (/= path) prevSaved
+    prevSaved <- io $ getRecents savePath
+
+    let newSaved = take numRec $ path : filter (/= path) prevSaved
         filename = savePath ++ "recents.txt"
         contents = unlines newSaved
 
-    writeFile filename contents
+    io $ writeFile filename contents
 
 getMaybe :: [a] -> Int -> Maybe a
 getMaybe lst index = listToMaybe (drop index lst)
@@ -274,11 +292,10 @@ main = do
     configPath <- (++ "/.config/svim/") <$> getHomeDirectory
 
     maybeConf <- getConfig configPath
-    print maybeConf
     case maybeConf of
         Left err -> putStrLn "Could not read config."
         Right confD -> do
             let action = parseArgs args
-                defaultConfig = Config{confData = confD, rootDir = configPath}
+                defaultConfig = (Config{_confData = confD, _rootDir = configPath})
             runStateT (execute action) defaultConfig
             return ()
