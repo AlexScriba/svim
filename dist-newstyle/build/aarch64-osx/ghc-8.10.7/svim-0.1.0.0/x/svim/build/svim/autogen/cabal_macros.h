@@ -20,6 +20,16 @@
   (major1) == 4 && (major2) <  14 || \
   (major1) == 4 && (major2) == 14 && (minor) <= 3)
 #endif /* MIN_VERSION_base */
+/* package brick-1.7 */
+#ifndef VERSION_brick
+#define VERSION_brick "1.7"
+#endif /* VERSION_brick */
+#ifndef MIN_VERSION_brick
+#define MIN_VERSION_brick(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  7 || \
+  (major1) == 1 && (major2) == 7 && (minor) <= 0)
+#endif /* MIN_VERSION_brick */
 /* package bytestring-0.10.12.0 */
 #ifndef VERSION_bytestring
 #define VERSION_bytestring "0.10.12.0"
@@ -30,6 +40,16 @@
   (major1) == 0 && (major2) <  10 || \
   (major1) == 0 && (major2) == 10 && (minor) <= 12)
 #endif /* MIN_VERSION_bytestring */
+/* package cursor-0.3.2.0 */
+#ifndef VERSION_cursor
+#define VERSION_cursor "0.3.2.0"
+#endif /* VERSION_cursor */
+#ifndef MIN_VERSION_cursor
+#define MIN_VERSION_cursor(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  3 || \
+  (major1) == 0 && (major2) == 3 && (minor) <= 2)
+#endif /* MIN_VERSION_cursor */
 /* package directory-1.3.6.0 */
 #ifndef VERSION_directory
 #define VERSION_directory "1.3.6.0"
@@ -40,6 +60,46 @@
   (major1) == 1 && (major2) <  3 || \
   (major1) == 1 && (major2) == 3 && (minor) <= 6)
 #endif /* MIN_VERSION_directory */
+/* package microlens-0.4.13.1 */
+#ifndef VERSION_microlens
+#define VERSION_microlens "0.4.13.1"
+#endif /* VERSION_microlens */
+#ifndef MIN_VERSION_microlens
+#define MIN_VERSION_microlens(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  4 || \
+  (major1) == 0 && (major2) == 4 && (minor) <= 13)
+#endif /* MIN_VERSION_microlens */
+/* package microlens-mtl-0.2.0.3 */
+#ifndef VERSION_microlens_mtl
+#define VERSION_microlens_mtl "0.2.0.3"
+#endif /* VERSION_microlens_mtl */
+#ifndef MIN_VERSION_microlens_mtl
+#define MIN_VERSION_microlens_mtl(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  2 || \
+  (major1) == 0 && (major2) == 2 && (minor) <= 0)
+#endif /* MIN_VERSION_microlens_mtl */
+/* package microlens-th-0.4.3.13 */
+#ifndef VERSION_microlens_th
+#define VERSION_microlens_th "0.4.3.13"
+#endif /* VERSION_microlens_th */
+#ifndef MIN_VERSION_microlens_th
+#define MIN_VERSION_microlens_th(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  4 || \
+  (major1) == 0 && (major2) == 4 && (minor) <= 3)
+#endif /* MIN_VERSION_microlens_th */
+/* package mtl-2.2.2 */
+#ifndef VERSION_mtl
+#define VERSION_mtl "2.2.2"
+#endif /* VERSION_mtl */
+#ifndef MIN_VERSION_mtl
+#define MIN_VERSION_mtl(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  2 || \
+  (major1) == 2 && (major2) == 2 && (minor) <= 2)
+#endif /* MIN_VERSION_mtl */
 /* package process-1.6.13.2 */
 #ifndef VERSION_process
 #define VERSION_process "1.6.13.2"
@@ -60,6 +120,16 @@
   (major1) == 0 && (major2) <  2 || \
   (major1) == 0 && (major2) == 2 && (minor) <= 3)
 #endif /* MIN_VERSION_split */
+/* package template-haskell-2.16.0.0 */
+#ifndef VERSION_template_haskell
+#define VERSION_template_haskell "2.16.0.0"
+#endif /* VERSION_template_haskell */
+#ifndef MIN_VERSION_template_haskell
+#define MIN_VERSION_template_haskell(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  16 || \
+  (major1) == 2 && (major2) == 16 && (minor) <= 0)
+#endif /* MIN_VERSION_template_haskell */
 /* package utf8-string-1.0.2 */
 #ifndef VERSION_utf8_string
 #define VERSION_utf8_string "1.0.2"
@@ -70,6 +140,16 @@
   (major1) == 1 && (major2) <  0 || \
   (major1) == 1 && (major2) == 0 && (minor) <= 2)
 #endif /* MIN_VERSION_utf8_string */
+/* package vty-5.38 */
+#ifndef VERSION_vty
+#define VERSION_vty "5.38"
+#endif /* VERSION_vty */
+#ifndef MIN_VERSION_vty
+#define MIN_VERSION_vty(major1,major2,minor) (\
+  (major1) <  5 || \
+  (major1) == 5 && (major2) <  38 || \
+  (major1) == 5 && (major2) == 38 && (minor) <= 0)
+#endif /* MIN_VERSION_vty */
 /* package yaml-0.11.11.0 */
 #ifndef VERSION_yaml
 #define VERSION_yaml "0.11.11.0"

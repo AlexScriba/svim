@@ -15,6 +15,7 @@ import Data.Yaml.Pretty (encodePretty)
 import Lens.Micro (set)
 import Lens.Micro.Mtl (use, (.=))
 import Lens.Micro.TH (makeLenses)
+import Menu (PathOption (..), getMenuSelection)
 import System.Directory (
     canonicalizePath,
     doesFileExist,
@@ -93,6 +94,7 @@ data Action where
     GetRecent :: Action
     GetFavourite :: Action
     DeleteFavourite :: Action
+    Terminate :: Action
     Error :: String -> Action
     deriving (Read, Show)
 
@@ -114,6 +116,7 @@ execute action = case action of
     GetFavourite -> handleGetFavourite
     DeleteFavourite -> handleDeleteFavourite
     GetRecent -> handleGetRecent
+    Terminate -> return ()
     Error msg -> io $ handleError msg
 
 setConfigCommand :: String -> ConfigIO ()
@@ -137,19 +140,17 @@ setNumRecent num =
 handleGetRecent :: ConfigIO ()
 handleGetRecent = do
     savePath <- use rootDir
-    prev <- io $ getRecents savePath
+    prevPaths <- io $ getRecents savePath
 
-    case prev of
+    case prevPaths of
         [] -> io $ putStrLn "No Recent Projects"
-        prevPaths -> do
-            choice <- io $ getSelection $ pathToOption <$> prev
+        paths -> do
+            let names = pathToName <$> paths
+            choice <- io $ getMenuSelection $ zipWith PathOption names paths
 
-            let index = subtract 1 <$> choice
-                pathChoice = index >>= getMaybe prev
-
-            case pathChoice of
+            case choice of
                 Just path -> execute $ Open path
-                Nothing -> execute $ Error "Invalid Selection"
+                Nothing -> execute Terminate
 
 handleOpen :: String -> ConfigIO ()
 handleOpen path = do
@@ -196,13 +197,13 @@ handleGetFavourite = do
     case savedNames of
         [] -> io $ putStrLn "No Saved Projects"
         names -> do
-            choice <- io $ getSelection names
+            choice <-
+                io $
+                    getMenuSelection $
+                        zipWith PathOption savedNames savedPaths
 
-            let index = subtract 1 <$> choice
-                path = index >>= getMaybe savedPaths
-
-            case path of
-                Nothing -> execute $ Error "Invalid Selection"
+            case choice of
+                Nothing -> execute Terminate
                 Just p -> execute $ Open p
 
 handleDeleteFavourite :: ConfigIO ()
@@ -215,9 +216,7 @@ handleDeleteFavourite = do
         names -> do
             choice <- io $ getSelection names
 
-            let index = subtract 1 <$> choice
-
-            case choice of
+            case subtract 1 <$> choice of
                 Nothing -> execute $ Error "Invalid Selection"
                 Just i -> do
                     (confData . saved) .= drop i names
@@ -270,8 +269,8 @@ saveRecents path = do
 getMaybe :: [a] -> Int -> Maybe a
 getMaybe lst index = listToMaybe (drop index lst)
 
-pathToOption :: String -> String
-pathToOption input = last $ splitOn "/" input
+pathToName :: FilePath -> String
+pathToName input = last $ splitOn "/" input
 
 getConfig :: String -> IO (Either ParseException ConfigData)
 getConfig dir = do
