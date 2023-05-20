@@ -1,20 +1,15 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Core where
 
-import Control.Monad.State (StateT (runStateT), get, gets, lift, put, runStateT)
-import Data.ByteString.UTF8 (fromString, toString)
+import Config
 import Data.List.Split (split, splitOn)
 import Data.Maybe (listToMaybe)
-import Data.Yaml (FromJSON, ParseException, ToJSON, decodeEither', encode, object, parseJSON, toJSON, withObject, (.!=), (.:))
-import qualified Data.Yaml as Yml ((.=))
 import Data.Yaml.Pretty (encodePretty)
 import Lens.Micro (set)
 import Lens.Micro.Mtl (use, (.=))
-import Lens.Micro.TH (makeLenses)
 import Menu (PathOption (..), getMenuSelection)
 import System.Directory (
     canonicalizePath,
@@ -36,61 +31,11 @@ import System.IO (
 import System.Process (system)
 import Text.Read (choice, readListPrecDefault, readMaybe)
 
-type ConfigPath = String
-
-type Path = String
-
-data ConfigData where
-    ConfigData ::
-        { _getCommand :: String
-        , _numRecent :: Int
-        , _saved :: [String]
-        , _paths :: [String]
-        } ->
-        ConfigData
-    deriving (Show)
-
-data Config where
-    Config ::
-        { _confData :: ConfigData
-        , _rootDir :: String
-        } ->
-        Config
-    deriving (Show)
-
-makeLenses ''ConfigData
-makeLenses ''Config
-
-splitConf :: Config -> (ConfigData, Path)
-splitConf Config{_confData = conf, _rootDir = dir} = (conf, dir)
-
-type ConfigIO a = StateT Config IO a
-
-io :: IO a -> ConfigIO a
-io = lift
-
-instance FromJSON ConfigData where
-    parseJSON = withObject "Config" $ \o -> do
-        command <- o .: "command"
-        numR <- o .: "num_recent"
-        s <- o .: "saved" .!= []
-        p <- o .: "paths" .!= []
-        return $ ConfigData command numR s p
-
-instance ToJSON ConfigData where
-    toJSON config =
-        object
-            [ "command" Yml..= _getCommand config
-            , "num_recent" Yml..= _numRecent config
-            , "saved" Yml..= _saved config
-            , "paths" Yml..= _paths config
-            ]
-
 data Action where
     SetCommand :: String -> Action
     SetNumRecent :: String -> Action
-    Open :: Path -> Action
-    OpenAndSave :: String -> Path -> Action
+    Open :: FilePath -> Action
+    OpenAndSave :: String -> FilePath -> Action
     GetRecent :: Action
     GetFavourite :: Action
     DeleteFavourite :: Action
@@ -271,16 +216,3 @@ getMaybe lst index = listToMaybe (drop index lst)
 
 pathToName :: FilePath -> String
 pathToName input = last $ splitOn "/" input
-
-getConfig :: String -> IO (Either ParseException ConfigData)
-getConfig dir = do
-    let path = dir ++ "/config.yaml"
-    input <- fromString <$> readFile path
-    return $ decodeEither' input
-
-saveConfig :: Path -> ConfigData -> IO ()
-saveConfig dir conf = do
-    let contents = toString $ encode conf
-        path = dir ++ "/config.yaml"
-
-    writeFile path contents

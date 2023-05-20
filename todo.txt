@@ -1,0 +1,10 @@
+- Make dev and main branches
+- Make icon at some point
+- Make realeses
+- Actually change the values of CONTRIBUTING contents
+- Change Readme
+- Make release
+- Add description
+- Add issue template
+- Add pull request template
+- Add buy me a coffee

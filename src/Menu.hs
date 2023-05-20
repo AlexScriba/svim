@@ -3,10 +3,17 @@
 
 module Menu where
 
-import Brick (bg, fg)
+import Brick (
+    App (..),
+    bg,
+    continueWithoutRedraw,
+    defaultMain,
+    fg,
+    halt,
+    showFirstCursor,
+ )
 import Brick.AttrMap (attrMap, attrName)
-import Brick.Main
-import Brick.Types
+import Brick.Types (BrickEvent (VtyEvent), EventM, Widget)
 import Brick.Util (on)
 import Brick.Widgets.Core
 import Brick.Widgets.Edit (Editor, handleEditorEvent)
@@ -15,7 +22,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import Graphics.Vty (Color (..), defAttr)
 import Graphics.Vty.Attributes (black, white)
-import Graphics.Vty.Input.Events
+import Graphics.Vty.Input.Events (Event (EvKey), Key (..))
 import Lens.Micro (set)
 import Lens.Micro.Extras (view)
 import Lens.Micro.Mtl (use, (.=))
