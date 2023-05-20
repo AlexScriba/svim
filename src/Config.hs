@@ -58,6 +58,7 @@ instance ToJSON ConfigData where
             , "num_recent" Yml..= _numRecent config
             , "saved" Yml..= _saved config
             , "paths" Yml..= _paths config
+            , "recent" Yml..= _recent config
             ]
 
 getConfig :: FilePath -> IO (Either ParseException ConfigData)

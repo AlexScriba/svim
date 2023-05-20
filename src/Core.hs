@@ -110,7 +110,7 @@ handleOpen path = do
             recents <- use $ confData . recent
             numRecent <- use $ confData . numRecent
 
-            let newRecents = take numRecent $ absolutePath : recents
+            let newRecents = makeNewRecents absolutePath recents numRecent
 
             (confData . recent) .= newRecents
 
@@ -199,3 +199,8 @@ getMaybe lst index = listToMaybe (drop index lst)
 
 pathToName :: FilePath -> String
 pathToName input = last $ splitOn "/" input
+
+makeNewRecents :: (Eq a) => a -> [a] -> Int -> [a]
+makeNewRecents newItem lst len =
+    let newList = newItem : filter (/= newItem) lst
+     in take len newList

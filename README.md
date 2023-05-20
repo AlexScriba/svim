@@ -2,25 +2,13 @@
 
 </br>
 
-# Ozon3
+# Svim
 
-![SVG of ozon3 logo](/src/media/ozon3_logo.svg)
-
-[![PyPI version](https://badge.fury.io/py/ozon3.svg)](https://badge.fury.io/py/ozon3) <a href="CONTRIBUTING.md#pull-requests"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a> ![GitHub](https://img.shields.io/github/license/Ozon3Org/Ozon3) [![Complete Documentation](https://github.com/Ozon3Org/Ozon3/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/Ozon3Org/Ozon3/actions/workflows/pages/pages-build-deployment) [![Dependency Review](https://github.com/Ozon3Org/Ozon3/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/Ozon3Org/Ozon3/actions/workflows/dependency-review.yml) [![Tests](https://github.com/Ozon3Org/Ozon3/actions/workflows/test.yml/badge.svg)](https://github.com/Ozon3Org/Ozon3/actions/workflows/test.yml) [![codecov](https://codecov.io/github/Ozon3Org/Ozon3/branch/main/graph/badge.svg?token=N2HMGQYCHI)](https://codecov.io/github/Ozon3Org/Ozon3)
-[![Buy Me a Coffee](https://img.shields.io/badge/buy_me_a_coffee-orange.svg?style=flat)](https://www.buymeacoffee.com/MilindSharma)
-
-## The simplest AQI API
+## A Simple Vim Wrapper for easy project access.
 
 </div>
 
-Getting air quality data with Python should be easy and straightforward - and that's exactly what Ozon3 can help you with.
-With Ozon3, just 4 lines of code are enough to get you the data you need. And the best part is that you can trust this data to be accurate and reliable, since the package uses the World Air Quality Index's API under the hood! ✅ 📈
-
-Use Ozon3 to **get real-time air quality data, or historical data from 2014 onwards**, and fetch air quality data **for anywhere in the world** in seconds.
-
-_You can view our complete documentation [here](https://Ozon3Org.github.io/Ozon3/)_
-
-_Don't forget to star Ozon3 repository if you found it helpful_
+_Don't forget to star Svim repository if you found it helpful_
 
 #### Table of Contents
 
