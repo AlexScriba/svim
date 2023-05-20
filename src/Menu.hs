@@ -45,25 +45,41 @@ data MenuState = MenuState
 
 makeLenses ''MenuState
 
+-- Attributes
+selectedNameAttr = attrName "selectedName"
+
+selectedPathAttr = attrName "selectedPath"
+
+legendAttr = attrName "legend"
+
 drawMenu :: MenuState -> [Widget ResourceName]
 drawMenu s =
     let nec = view filePaths s
-     in [ vBox $
-            concat
-                [ map (drawPath False) $ reverse $ nonEmptyCursorPrev nec
-                , [drawPath True $ nonEmptyCursorCurrent nec]
-                , map (drawPath False) $ nonEmptyCursorNext nec
-                ]
+     in [ vBox
+            [ padLeft (Pad 1) $
+                padBottom Max $
+                    vBox $
+                        concat
+                            [ map (drawPath False) $ reverse $ nonEmptyCursorPrev nec
+                            , [drawPath True $ nonEmptyCursorCurrent nec]
+                            , map (drawPath False) $ nonEmptyCursorNext nec
+                            ]
+            , withAttr legendAttr $
+                hBox
+                    [ strWrap "down: [j] / [Down]"
+                    , strWrap "up: [k] / [Up]"
+                    , strWrap "open: [Enter]"
+                    , strWrap "close: [Esc] / [q]"
+                    ]
+            ]
         ]
 
 drawPath :: Bool -> PathOption -> Widget n
 drawPath False (PathOption nm pth) = str nm
 drawPath True (PathOption nm pth) =
-    let nameAttr = attrName "selectedName"
-        pathAttr = attrName "selectedPath"
-        padding = replicate 8 ' '
-        nameW = withAttr nameAttr $ str nm
-        pathW = withAttr pathAttr $ str (padding ++ pth)
+    let padding = replicate 8 ' '
+        nameW = withAttr selectedNameAttr $ str nm
+        pathW = withAttr selectedPathAttr $ str (padding ++ pth)
      in nameW <+> pathW
 
 handleTuiEvent :: BrickEvent n e -> EventM n MenuState ()
@@ -121,8 +137,9 @@ app =
             const $
                 attrMap
                     defAttr
-                    [ (attrName "selectedName", black `on` white)
-                    , (attrName "selectedPath", gray `on` white)
+                    [ (selectedNameAttr, black `on` white)
+                    , (selectedPathAttr, gray `on` white)
+                    , (legendAttr, fg gray)
                     ]
         }
 
