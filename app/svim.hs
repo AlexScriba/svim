@@ -1,5 +1,6 @@
+import Config (Config (..), ConfigData (..), getConfig)
 import Control.Monad.State (StateT (runStateT))
-import Core (Config (..), ConfigData (..), execute, getConfig, parseArgs)
+import Core (execute, parseArgs)
 import System.Directory (getHomeDirectory)
 import System.Directory.Internal.Prelude (getArgs)
 

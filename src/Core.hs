@@ -13,7 +13,6 @@ import Lens.Micro.Mtl (use, (.=))
 import Menu (PathOption (..), getMenuSelection)
 import System.Directory (
     canonicalizePath,
-    doesFileExist,
     doesPathExist,
     getHomeDirectory,
  )
@@ -85,9 +84,9 @@ setNumRecent num =
 handleGetRecent :: ConfigIO ()
 handleGetRecent = do
     savePath <- use rootDir
-    prevPaths <- io $ getRecents savePath
+    recents <- use $ confData . recent
 
-    case prevPaths of
+    case recents of
         [] -> io $ putStrLn "No Recent Projects"
         paths -> do
             let names = pathToName <$> paths
@@ -102,14 +101,23 @@ handleOpen path = do
     absolutePath <- io $ canonicalizePath path
 
     cmd <- use $ confData . getCommand
-    config <- use confData
-    savePath <- use rootDir
 
     let command = "cd " ++ path ++ " && " ++ cmd
     exitCode <- io $ system command
 
     case exitCode of
-        ExitSuccess -> saveRecents absolutePath
+        ExitSuccess -> do
+            recents <- use $ confData . recent
+            numRecent <- use $ confData . numRecent
+
+            let newRecents = take numRecent $ absolutePath : recents
+
+            (confData . recent) .= newRecents
+
+            conf <- use confData
+            savePath <- use rootDir
+
+            io $ saveConfig savePath conf
         ExitFailure code -> io $ putStrLn $ "Code: " ++ show code
 
 handleOpenAndSave :: String -> String -> ConfigIO ()
@@ -185,31 +193,6 @@ getSelection options = do
     putStr "> "
     hFlush stdout
     readMaybe <$> getLine
-
-getRecents :: String -> IO [String]
-getRecents dir = do
-    let path = dir ++ "recents.txt"
-
-    fileExists <- doesFileExist path
-    if fileExists
-        then do
-            contents <- readFile path
-            length contents `seq` return ()
-            return $ filter (/= "") $ lines contents
-        else return []
-
-saveRecents :: String -> ConfigIO ()
-saveRecents path = do
-    savePath <- use rootDir
-    numRec <- use $ confData . numRecent
-
-    prevSaved <- io $ getRecents savePath
-
-    let newSaved = take numRec $ path : filter (/= path) prevSaved
-        filename = savePath ++ "recents.txt"
-        contents = unlines newSaved
-
-    io $ writeFile filename contents
 
 getMaybe :: [a] -> Int -> Maybe a
 getMaybe lst index = listToMaybe (drop index lst)

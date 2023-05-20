@@ -8,7 +8,9 @@ import Control.Monad.State (StateT (runStateT), get, gets, lift, put, runStateT)
 import Data.ByteString.UTF8 (fromString, toString)
 import Data.Yaml (FromJSON, ParseException, ToJSON, decodeEither', encode, object, parseJSON, toJSON, withObject, (.!=), (.:))
 import qualified Data.Yaml as Yml ((.=))
+import Lens.Micro.Mtl (use)
 import Lens.Micro.TH (makeLenses)
+import System.Directory (doesFileExist)
 
 data ConfigData where
     ConfigData ::
@@ -16,6 +18,7 @@ data ConfigData where
         , _numRecent :: Int
         , _saved :: [String]
         , _paths :: [String]
+        , _recent :: [String]
         } ->
         ConfigData
     deriving (Show)
@@ -45,7 +48,8 @@ instance FromJSON ConfigData where
         numR <- o .: "num_recent"
         s <- o .: "saved" .!= []
         p <- o .: "paths" .!= []
-        return $ ConfigData command numR s p
+        r <- o .: "recent" .!= []
+        return $ ConfigData command numR s p r
 
 instance ToJSON ConfigData where
     toJSON config =
