@@ -4,7 +4,7 @@
 
 # Svim
 
-## A Simple Vim Wrapper for easy project access.
+## A Simple Vim Wrapper for easy recent project access.
 
 </div>
 
@@ -12,9 +12,7 @@ _Don't forget to star Svim repository if you found it helpful_
 
 #### Table of Contents
 
-[Install ozon3](#install-it-here)
-
-[Getting your API token](#getting-your-api-token)
+[Install svim](#install-it-here)
 
 [Getting started](#getting-started)
 
@@ -30,107 +28,98 @@ _Don't forget to star Svim repository if you found it helpful_
 
 ## Install it here!
 
-```sh
-pip install ozon3
-```
+Since svim is still pre-release, the installation process is still quite manual.
+For now, it has only been tested on MacOS, but should in theory work on Linux as well.
 
-You can find more information on the PyPI page for Ozon3 [here](https://pypi.org/project/ozon3/)
+1. Download or Clone the project files.
+2. Make sure you have cabal (a haskell build tool) installed.
+3. In the project directory, run:
+   ```shell
+   cabal build svim
+   ```
+4. Fetch the executable from the dist-newstyle/build/ directory. (Keep going down the hierarchy until you find the executable called 'svim').
+5. Move that to your /usr/local/bin/ directory (For MacOS).
 
-## Getting your API token
-
-To use Ozon3, you must first request and get a your own unique API token 🎫. This is required to access for the underlying API to work 👮🏼‍♂️.
-
-This is very easy to do, and takes no time at all as your token is generally emailed to you instantly.
-
-Get your token [here](https://aqicn.org/data-platform/token/#/)!
+The executable should be available globally.
 
 ## Getting started
 
-### Real-time data
+### Setting Preffered Editor
 
-```python
-import ozon3 as ooo
+To use svim set your preferred editor command:
 
-o3 = ooo.Ozon3('YOUR_PRIVATE_TOKEN')
-data = o3.get_city_air('New Delhi')
+```shell
+svim --set-editor <editor-command>
 ```
 
-for many cities:
+It defaults to neovim (nvim). As an example of setting that:
 
-```python
-data = o3.get_multiple_city_air(['London', 'Hong Kong', 'New York'])     # As many locations as you need
+```shell
+svim --set-editor nvim
 ```
 
-### Historical data
+### Opening a project
 
-```python
-data = o3.get_historical_data(city='Houston')     # data from 2014 onwards!
+To open a project using svim, simply type svim followed by the relative path:
+
+```shell
+svim ~/.config/nvim
 ```
 
-<hr>
+This will open the project with your chosen editor, and save that file path for future use.
 
-### Examples In Action 🎬
+### Opening a recent project
 
-![Gif of Ozon3.get_city_air()](/src/media/example_get_city_air.gif)
+Svim keeps track of your most recently opened projects. Once projects are saved, simply type:
 
-![Gif of Ozon3.get_multiple_city_air()](/src/media/example_get_multiple_city_air.gif)
+```shell
+svim
+```
 
-![Gif of Ozon3.get_historical_data()](/src/media/example_get_historical_data.gif)
+and a interactive menu pops up allowing you to choose from your recently opened projects
 
-### Air Quality Parameters
+### Saving Favourites
 
-Ozon3 can fetch the following parameters:
+You can also save some favourite projects that you access often.
 
-- `aqi`: air quality index, a measurement of air quality that tells you how clean or polluted the air is. It is measured in micrograms per cubic meter (µg/m3).
-- `pm25`: fine particulate matter, a measure of 2.5 micrometers or smaller particles in the air. It is measured in micrograms per cubic meter (µg/m3).
-- `pm10`: respirable particulate matter, a measure of 10 micrometers or smaller particles in the air. It is measured in micrograms per cubic meter (µg/m3).
-- `o3`: a measure of ground level ozon3 concentrations in the air. It is measured in parts per billion (ppb).
-- `co`: a measure of carbon monoxide concentrations in the air. It is measured in parts per billion (ppb).
-- `no2`: a measure of nitrogen dioxide concentrations in the air. It is measured in parts per billion (ppb).
-- `so2`: a measure of sulfur dioxide concentrations in the air. It is measured in parts per billion (ppb).
-- `dew`: dew point, the temperature the air needs to be cooled to in order to reach 100% relative humidity. It is measured in Celsius (°C) or Fahrenheit (°F).
-- `h`: relative humidity, a measure of moisture in the atmosphere. It does not have a standard unit of measurement.
-- `p`: atmospheric pressure, a measure of the weight of atoms and molecules that make up the layers in the atmosphere. It is measured in Pascal (Pa).
-- `t`: temperature, a measure of thermal energy in one or a combined substance at a given time. It is measured in Celsius (°C) or Fahrenheit (°F).
-- `w`: wind speed, a measure of air in motion. It is measured in kilometers per hour (km/h)
+Type svim followed by the -s flag, the name you want to call it, and the filepath.
 
-Sample output:
-<img width="1065" alt="blehblhe" src="./src/media/sample-output.png">
+```shell
+svim -s nvim_config ~/.config/nvim/
+```
+
+You can then access these with the -f flag:
+
+```shell
+svim -f
+```
+
+this opens the interactive menu to let you select your project
+
+You can also run to delete a favourite:
+
+```shell
+svim -d
+```
+
+This will guide you through deleting a favourite.
 
 ## Contributing and submitting Pull requests
 
 **We love PR's!**
 
-Take a look at the [CONTRIBUTING.md](https://github.com/Ozon3Org/Ozon3/blob/main/CONTRIBUTING.md) file for details on how to go about this!
+Take a look at the [CONTRIBUTING.md](https://github.com/AlexScriba/svim/blob/main/CONTRIBUTING.md) file for details on how to go about this!
 
 ## Semantic Versioning System
 
-Ozon3 uses a semantic versioning system to increment its release version number. Using this model, changes in version numbers can help indicate the meaning of modified code for each version.
-
-See more information on semantic versioning [here](https://github.com/Ozon3Org/Ozon3/discussions/26).
-
-## World Air Quality Index and EPA attribution
-
-This package is a wrapper around an API provided by the World Air Quality Index project. Without them as well as the US EPA, Ozon3 would not exist. Please consider visiting the WAQI website and contributing to their project if you have time:
-
-[World Air Quality Index](https://aqicn.org/contact/)
-
-[United States Environmental Protection Agency](https://www.epa.gov/aboutepa)
+Svim uses a semantic versioning system to increment its release version number. Using this model, changes in version numbers can help indicate the meaning of modified code for each version.
 
 ## LICENSE and Terms of Services 📰
 
-1. Ozon3 is licensed under the GNU GENERAL PUBLIC LICENSE v3.0, and so it cannot be used for closed-source software or for monetary gain.
-2. The WAQI API, which Ozon3 uses to provide data, has it's own [Acceptable Usage Policy](https://aqicn.org/api/tos/). Please refer to it for more details.
+Svim is licensed under the MIT License. See the [LICENSE.md](https://github.com/AlexScriba/svim/blob/main/LICENSE.md) for more details.
 
 ## Contributors
 
 Contributions of any kind are welcome! These are our amazing contributors :)
 
-<a href="https://github.com/Ozon3Org/Ozon3/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Ozon3Org/Ozon3" />
-</a>
-
-Enjoy using Ozon3!
-🥳 🍾 🚀
-
-#### _Created by [Milind Sharma](https://github.com/Milind220)_
+#### _Created by [Alexander Scriba](https://github.com/AlexScriba)_

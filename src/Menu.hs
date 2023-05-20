@@ -65,12 +65,14 @@ drawMenu s =
                             , map (drawPath False) $ nonEmptyCursorNext nec
                             ]
             , withAttr legendAttr $
-                hBox
-                    [ strWrap "down: [j] / [Down]"
-                    , strWrap "up: [k] / [Up]"
-                    , strWrap "open: [Enter]"
-                    , strWrap "close: [Esc] / [q]"
-                    ]
+                padLeft (Pad 2) $
+                    padBottom (Pad 1) $
+                        hBox
+                            [ strWrap "down: [j] / [Down]"
+                            , strWrap "up: [k] / [Up]"
+                            , strWrap "open: [Enter]"
+                            , strWrap "close: [Esc] / [q]"
+                            ]
             ]
         ]
 
